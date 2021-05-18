@@ -1,83 +1,52 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import axios from 'axios';
+import Pusher from 'pusher-js';
 
 export default function App() {
   const [state, setState] = useState({
-    squares: Array(9).fill(null),
-    xIsNext: true,
+    text: '',
+    messages: [],
   });
 
-  const squares = state.squares;
-  const xIsNext = state.xIsNext;
-
-  // ================
-
-  let statusText;
-  const winner = winnerCheck(squares);
-
-  if (winner) {
-    statusText = `Winner: ${winner}`;
-  } else {
-    statusText = `Next: ${xIsNext ? 'X' : 'O'}`;
-  }
-
-  // ================
-
-  const handleSquareClick = (id) => {
-    const copySquares = squares.slice();
-
-    if (copySquares[id] || winner) {
-      return;
-    }
-
-    copySquares[id] = xIsNext ? 'X' : 'O';
-
+  const handleChange = (e) => {
     setState((prev) => ({
       ...prev,
-      squares: copySquares,
-      xIsNext: !prev.xIsNext,
+      text: e.target.value,
     }));
   };
 
-  // ================
+  const handleSubmit = () => {
+    const payload = { message: state.text };
+    axios.post('http://localhost:5000/message', payload);
+  };
+
+  useEffect(() => {
+    const pusher = new Pusher('0082faa9fdf79271994d', { cluster: 'eu' });
+    const channel = pusher.subscribe('chat');
+
+    channel.bind('message', (data) => {
+      console.log('xxxx', data);
+
+      setState((prev) => ({
+        ...prev,
+        text: '',
+        messages: [...prev.messages, data.message],
+      }));
+    });
+  }, []);
 
   return (
     <div className='app'>
-      <div className='board'>
-        {squares.map((square, idx) => {
-          return (
-            <div className='board-item' key={idx} onClick={() => handleSquareClick(idx)}>
-              {square}
-            </div>
-          );
-        })}
-      </div>
+      <input type='text' value={state.text} onChange={handleChange} />
+      <button onClick={handleSubmit}>Send</button>
 
-      <div className='status'>{statusText}</div>
+      <div className='message_list'>
+        {state.messages.map((item) => (
+          <div className='message_list-item' key={item}>
+            {item}
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
-
-// ================
-
-const winnerCheck = (squares) => {
-  const lines = [
-    [0, 1, 2],
-    [3, 4, 5],
-    [6, 7, 8],
-    [0, 3, 6],
-    [1, 4, 7],
-    [2, 5, 8],
-    [0, 4, 8],
-    [2, 4, 6],
-  ];
-
-  for (let i = 0; i < lines.length; i++) {
-    const [a, b, c] = lines[i];
-
-    if (squares[a] && squares[a] === squares[b] && squares[a] === squares[c]) {
-      return squares[a];
-    }
-  }
-
-  return null;
-};
