@@ -1,0 +1,26 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  font-family: consolas;
+}
+
+/* ================ */
+
+.message_list {
+  width: 200px;
+  margin: 20px auto 0;
+}
+
+.message_list-item {
+  border: 1px solid #444;
+  margin-bottom: 10px;
+}

@@ -4,48 +4,36 @@ import Pusher from 'pusher-js';
 
 export default function App() {
   const [state, setState] = useState({
-    text: '',
-    messages: [],
+    squares: [null, null],
   });
 
-  const handleChange = (e) => {
-    setState((prev) => ({
-      ...prev,
-      text: e.target.value,
-    }));
-  };
+  const handleSquareClick = (idx) => {
+    const copySquares = state.squares.slice();
+    copySquares[idx] = 'X';
 
-  const handleSubmit = () => {
-    const payload = { message: state.text };
-    axios.post('http://localhost:5000/message', payload);
+    const payload = { copySquares: copySquares };
+    axios.post('http://localhost:5000/fill', payload);
   };
 
   useEffect(() => {
     const pusher = new Pusher('0082faa9fdf79271994d', { cluster: 'eu' });
-    const channel = pusher.subscribe('chat');
+    const channel = pusher.subscribe('board');
 
-    channel.bind('message', (data) => {
-      console.log('xxxx', data);
-
-      setState((prev) => ({
-        ...prev,
-        text: '',
-        messages: [...prev.messages, data.message],
-      }));
+    channel.bind('fill', (data) => {
+      setState((prev) => ({ ...prev, squares: data.copySquares }));
     });
-  }, []);
+  });
 
   return (
-    <div className='app'>
-      <input type='text' value={state.text} onChange={handleChange} />
-      <button onClick={handleSubmit}>Send</button>
-
-      <div className='message_list'>
-        {state.messages.map((item) => (
-          <div className='message_list-item' key={item}>
-            {item}
-          </div>
-        ))}
+    <div>
+      <div className='board'>
+        {state.squares.map((square, idx) => {
+          return (
+            <div className='square' onClick={() => handleSquareClick(idx)} key={idx}>
+              {square}
+            </div>
+          );
+        })}
       </div>
     </div>
   );
