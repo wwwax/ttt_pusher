@@ -4,14 +4,20 @@ import Pusher from 'pusher-js';
 
 export default function App() {
   const [state, setState] = useState({
-    squares: [null, null],
+    squares: Array(9).fill(null),
+    xIsNext: true,
   });
 
   const handleSquareClick = (idx) => {
-    const copySquares = state.squares.slice();
-    copySquares[idx] = 'X';
+    const squares = state.squares.slice();
+    squares[idx] = state.xIsNext ? 'X' : 'O';
+    const xIsNext = !state.xIsNext;
 
-    const payload = { copySquares: copySquares };
+    const payload = {
+      squares,
+      xIsNext,
+    };
+
     axios.post('http://localhost:5000/fill', payload);
   };
 
@@ -20,7 +26,10 @@ export default function App() {
     const channel = pusher.subscribe('board');
 
     channel.bind('fill', (data) => {
-      setState((prev) => ({ ...prev, squares: data.copySquares }));
+      setState({
+        squares: data.squares,
+        xIsNext: data.xIsNext,
+      });
     });
   });
 
