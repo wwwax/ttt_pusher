@@ -33,3 +33,9 @@ html {
 
   font-size: 40px;
 }
+
+.status {
+  text-align: center;
+  font-size: 30px;
+  padding: 10px 0;
+}
