@@ -19,6 +19,11 @@ export default function App() {
 
   const handleSquareClick = (idx) => {
     const squares = state.squares.slice();
+
+    if (winner || squares[idx]) {
+      return;
+    }
+
     squares[idx] = state.xIsNext ? 'X' : 'O';
     const xIsNext = !state.xIsNext;
 
