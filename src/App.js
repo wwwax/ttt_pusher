@@ -9,8 +9,13 @@ export default function App() {
   });
 
   let statusMessage;
+  const winner = winnerChecking(state.squares);
 
-  statusMessage = `Next: ${state.xIsNext ? 'X' : 'O'}`;
+  if (winner) {
+    statusMessage = `Winner: ${winner}`;
+  } else {
+    statusMessage = `Next: ${state.xIsNext ? 'X' : 'O'}`;
+  }
 
   const handleSquareClick = (idx) => {
     const squares = state.squares.slice();
@@ -65,4 +70,14 @@ function winnerChecking(squares) {
     [0, 4, 8],
     [2, 4, 6],
   ];
+
+  for (let i = 0; i < lines.length; i++) {
+    const [a, b, c] = lines[i];
+
+    if (squares[a] && squares[a] === squares[b] && squares[a] === squares[c]) {
+      return squares[a];
+    }
+  }
+
+  return null;
 }
